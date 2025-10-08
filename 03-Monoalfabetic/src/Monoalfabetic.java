@@ -1,101 +1,128 @@
 /*
- * Name and surname : Akasha Karam
- * Problem: In this activity whe have to convert the normal text into permutat 
- * 
+ * Programa que xifra i desxifra textos amb xifratge mono-alfabètic.
+ * Utilitza una permutació fixa de l'alfabet per substituir les lletres.
+ * Manté majúscules, minúscules, espais i símbols.
  */
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Collection;
-
+import java.util.*; 
 public class Monoalfabetic {
 
+    // Array de majùscules
     static char[] majuscules = "AÀÁÄBCÇDEÈÉËFGHIÌÍÏJKLMNÑOÒÓÖPQRSTUÙÚÜVWXYZ".toCharArray();
 
-    public static char[] permutaAlfabet(char[] alfabet ){
+    // Aquest array es guardarà la permutació generada per poder desxifrar després
+    static char[] permutat;
 
-        //Convertim el charArray en list
-        List<Character> llista = new ArrayList()<>;
+    //En aquest mètode tenim que crear un array permutat
+    public static char[] permutaAlfabet(char[] alfabet) {
 
-       //Guardem cada caracter en la llista 
-       for(charcater c : llista){
-         llista.add(c);
-       }
+        // Convertim el char[] en una llista de caràcters
+        List<Character> llista = new ArrayList<>();
 
-       //Desprès el desordem amb el 
-       Collections.shuffle(llista);
+        // Afegim cada lletra de l’alfabet a la llista
+        for (char c : alfabet) {
+            llista.add(c);
+        }
 
-       // Convertir a array de char amb el bucle 
+        // Barregem l’ordre dels caràcters amb Collections.shuffle
+        Collections.shuffle(llista);
+
+        // Creem un nou array de caràcters amb la mateixa mida
         char[] arrayChar = new char[llista.size()];
+
+        // Tornem a passar cada lletra de la llista al nou array
         for (int i = 0; i < llista.size(); i++) {
             arrayChar[i] = llista.get(i);
         }
 
-        return arrayChar[i];
+        // Retornem el nou alfabet permutat
+        return arrayChar;
     }
 
-    public static char[] xifraMonoAlfa(String cadena){
-        
-        //Cridem al metòde anterior amb el char
-        char[] permutat = permutaAlfabet(majuscules);
-        //onvertim la cadena en array
-        char[] array = new char[cadena.length()];
+    //Comparem el array majùscules amb el permutat
+    public static String xifraMonoAlfa(String cadena) {
 
+        // Generem la permutació només una vegada
+        permutat = permutaAlfabet(majuscules);
 
-       // recorrem cada caràcter de la cadena
+        // Creem una cadena buida per anar afegint les lletres xifrades
+        String resultat = "";
+
+        // Recorrem cada caràcter de la cadena original
         for (int i = 0; i < cadena.length(); i++) {
             char c = cadena.charAt(i);
-            boolean trobat = false;
+            boolean trobat = false; 
 
-            // busquem el caràcter a l'alfabet original
+            // Recorrem l’alfabet per buscar la lletra (en majúscula o minúscula)
             for (int j = 0; j < majuscules.length; j++) {
+                // Si la lletra és majúscula
                 if (c == majuscules[j]) {
-                    array[i] = permutat[j]; 
+                    resultat += permutat[j];
                     trobat = true;
+                    break;
+                }
+                // Si la lletra és minúscula, convertim a majúscula per trobar la seva posició
+                else if (Character.toUpperCase(c) == majuscules[j]) {
+                    resultat += Character.toLowerCase(permutat[j]);
+                    trobat = true;
+                    break;
                 }
             }
 
+            // Si el caràcter no és una lletra (espai, número, etc.), el deixem igual
             if (!trobat) {
-                array[i] = c; 
+                resultat += c;
             }
         }
 
-        return array;
+        return resultat;
     }
 
-    public static char[] desxifraMonoAlfa(String cadena){
-        
-        char[] permutat = permutaAlfabet(majuscules);
+    // Fem al revès 
+    public static String desxifraMonoAlfa(String cadena) {
 
-        char[] array = new char[cadena.length()];
+        // Creem una cadena buida per al resultat
+        String resultat = "";
 
-        // recorrem cada caràcter de la cadena
+        // Recorrem cada lletra del text xifrat
         for (int i = 0; i < cadena.length(); i++) {
             char c = cadena.charAt(i);
             boolean trobat = false;
 
-            // busquem el caràcter a l'alfabet original
-            for (int j = 0; j < majuscules.length; j++) {
-                if (c == majuscules[j]) {
-                      permutat[j] = array[i];
-                        trobat = true;
+            // Recorrem l'alfabet permutat per trobar la posició original
+            for (int j = 0; j < permutat.length; j++) {
+                // Si és majúscula
+                if (c == permutat[j]) {
+                    resultat += majuscules[j];
+                    trobat = true;
+                    break;
+                }
+                // Si és minúscula
+                else if (Character.toUpperCase(c) == permutat[j]) {
+                    resultat += Character.toLowerCase(majuscules[j]);
+                    trobat = true;
+                    break;
                 }
             }
 
+            // Si el caràcter no és lletra, es deixa igual
             if (!trobat) {
-                array[i] = c; 
+                resultat += c;
             }
         }
 
-        return array;
+        return resultat;
     }
 
-    }
-
+    // --- MÈTODE MAIN per provar el programa ---
     public static void main(String[] args) {
 
-        String cadena = "a b c d e f g h i j k l m n o p q r s t u v w x y z";
-        System.out.println(cadena);
-        System.out.println("| | | | | | | | | | | | | | | | | | | | | | | | | |");
-    }
+        String text = "a b c d e f g h i j k l m n o p q r s t u v w x y z";
+        System.out.println("Text original: " + text);
 
+        String xifrat = xifraMonoAlfa(text);
+        System.out.println("Text xifrat:  " + xifrat);
+
+        String desxifrat = desxifraMonoAlfa(xifrat);
+        System.out.println("Text desxifrat: " + desxifrat);
+    }
+}
