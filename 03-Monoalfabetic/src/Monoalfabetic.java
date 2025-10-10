@@ -12,6 +12,11 @@ public class Monoalfabetic {
     // Aquest array es guardarà la permutació generada per poder desxifrar després
     static char[] permutat;
 
+    //Missatge que es vol permutar
+    String msgs[] ={"Test 01 àrbitre,coixí,Perímetre",
+                    "Test 02 Taül DÍA,año",
+                    "Test 03 Peça,Òrrius, Bòvilia"};
+
     //En aquest mètode tenim que crear un array permutat
     public static char[] permutaAlfabet(char[] alfabet) {
 
