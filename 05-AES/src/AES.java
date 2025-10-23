@@ -1,3 +1,4 @@
+package src;
 /**
  * Classe que implementa el xifrat i desxifrat utilitzant 
  * l'estàndard AES en mode CBC amb PKCS5Padding.
