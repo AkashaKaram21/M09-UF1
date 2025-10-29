@@ -1,50 +1,25 @@
-import java.util.Random;
 package iticbcn.xifratge;
 
+import java.util.Random;
 
-
-public class XifradorPolialfabetic implements xifarar {
-    // Alfabeto completo con letras normales, acentos y caracteres especiales
-    final  char[] alfabet = "abcdefghijklmnopqrstuvwxyzàèéíïòóúüçñ".toCharArray();
+public class XifradorPolialfabetic implements Xifrador {
+    private final char[] alfabet = "abcdefghijklmnopqrstuvwxyzàèéíïòóúüçñ".toCharArray();
+    private char[] alfabetPermutat = new char[alfabet.length];
+    private Random random;
     
-    // Array donde guardaremos el alfabeto mezclado
-     char[] alfabetPermutat = new char[alfabet.length];
-    
-    // Objeto para generar números aleatorios
-     Random random;
-    
-    // Clave secreta para inicializar el generador de números aleatorios
-     long clauSecreta = 12345L;
-    
-    // Método para inicializar el generador de números aleatorios con una semilla
-    public static void initRandom(long llavor) {
-        random = new Random(llavor);
-    }
-    
-    // Método que genera una permutación aleatoria del alfabeto
-    public static void permutaAlfabet() {
-        // Copiamos el alfabeto original
-        for (int i = 0; i < alfabet.length; i++) {
-            alfabetPermutat[i] = alfabet[i];
+    @Override
+    public TextXifrat xifra(String msg, String clau) throws ClauNoSuportada {
+        try {
+            Long.parseLong(clau);
+        } catch (NumberFormatException e) {
+            throw new ClauNoSuportada("La clau per xifrat Polialfabètic ha de ser un String convertible a long");
         }
         
-        // Mezclamos el alfabeto usando intercambios aleatorios
-        for (int i = 0; i < alfabetPermutat.length; i++) {
-            int posicioAleatoria = random.nextInt(alfabetPermutat.length);
-            char temp = alfabetPermutat[i];
-            alfabetPermutat[i] = alfabetPermutat[posicioAleatoria];
-            alfabetPermutat[posicioAleatoria] = temp;
-        }
-    }
-    
-    // Método para cifrar un mensaje usando cifrado polialfabético
-    public static String xifraPoliAlfa(String msg) {
-        if (msg == null || msg.length() == 0) {
-            return msg;
-        }
+        long llavor = Long.parseLong(clau);
+        initRandom(llavor);
+        permutaAlfabet();
         
         String resultat = "";
-        
         for (int i = 0; i < msg.length(); i++) {
             char lletra = msg.charAt(i);
             char lletraXifrada = lletra;
@@ -53,7 +28,6 @@ public class XifradorPolialfabetic implements xifarar {
                 boolean esMajuscula = Character.isUpperCase(lletra);
                 char lletraMinuscula = Character.toLowerCase(lletra);
                 
-                // Buscar la posición en el alfabeto original
                 int posicio = -1;
                 for (int j = 0; j < alfabet.length; j++) {
                     if (alfabet[j] == lletraMinuscula) {
@@ -71,18 +45,25 @@ public class XifradorPolialfabetic implements xifarar {
             }
             
             resultat += lletraXifrada;
-            permutaAlfabet(); // ¡IMPORTANTE! Nueva permutación para cada letra
+            permutaAlfabet();
         }
         
-        return resultat;
+        return new TextXifrat(resultat.getBytes());
     }
     
-    // Método para descifrar un mensaje cifrado
-    public static String desxifraPoliAlfa(String msgXifrat) {
-        if (msgXifrat == null || msgXifrat.length() == 0) {
-            return msgXifrat;
+    @Override
+    public String desxifra(TextXifrat xifrat, String clau) throws ClauNoSuportada {
+        try {
+            Long.parseLong(clau);
+        } catch (NumberFormatException e) {
+            throw new ClauNoSuportada("La clau de Polialfabètic ha de ser un String convertible a long");
         }
         
+        long llavor = Long.parseLong(clau);
+        initRandom(llavor);
+        permutaAlfabet();
+        
+        String msgXifrat = new String(xifrat.getBytes());
         String resultat = "";
         
         for (int i = 0; i < msgXifrat.length(); i++) {
@@ -93,7 +74,6 @@ public class XifradorPolialfabetic implements xifarar {
                 boolean esMajuscula = Character.isUpperCase(lletraXifrada);
                 char lletraMinuscula = Character.toLowerCase(lletraXifrada);
                 
-                // Buscar la posición en el alfabeto permutado
                 int posicio = -1;
                 for (int j = 0; j < alfabetPermutat.length; j++) {
                     if (alfabetPermutat[j] == lletraMinuscula) {
@@ -111,30 +91,26 @@ public class XifradorPolialfabetic implements xifarar {
             }
             
             resultat += lletraOriginal;
-            permutaAlfabet(); // ¡IMPORTANTE! Nueva permutación para cada letra
+            permutaAlfabet();
         }
         
         return resultat;
     }
     
-    public static void main(String[] args) {
-        String msgs[] = {"Test 01 àrbritre, coixí, Perimetre",
-                        "Test 02 Taüll, DÍA, año",
-                        "Test 03 Peça, Òrrius, Bòvila"};
-        String msgsXifrats[] = new String[msgs.length];
-
-        System.out.println("Xifratge:\n---");
-        for (int i = 0; i < msgs.length; i++) {
-            initRandom(clauSecreta);
-            msgsXifrats[i] = xifraPoliAlfa(msgs[i]);
-            System.out.printf("%-34s -> %s%n", msgs[i], msgsXifrats[i]);
+    private void initRandom(long llavor) {
+        random = new Random(llavor);
+    }
+    
+    private void permutaAlfabet() {
+        for (int i = 0; i < alfabet.length; i++) {
+            alfabetPermutat[i] = alfabet[i];
         }
-
-        System.out.println("Desxifratge:\n---");
-        for (int i = 0; i < msgs.length; i++) {
-            initRandom(clauSecreta);
-            String msg = desxifraPoliAlfa(msgsXifrats[i]);
-            System.out.printf("%-34s -> %s%n", msgsXifrats[i], msg);
+        
+        for (int i = 0; i < alfabetPermutat.length; i++) {
+            int posicioAleatoria = random.nextInt(alfabetPermutat.length);
+            char temp = alfabetPermutat[i];
+            alfabetPermutat[i] = alfabetPermutat[posicioAleatoria];
+            alfabetPermutat[posicioAleatoria] = temp;
         }
     }
 }
